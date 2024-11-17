@@ -35,12 +35,13 @@ import kotlin.random.Random
 
 @Composable
 fun HomeScreen(
-    sections: Map<String, List<Product>>
+    sections: Map<String, List<Product>>,
+    textoDeBusca: String= ""
 ) {
 
     Column {
         //remember vai manter o ultimo estado salvo
-        var text by remember { mutableStateOf("") }
+        var text by remember { mutableStateOf(textoDeBusca) }
 
 
         //onValueChange identifica se o valor esta sendo alterado
@@ -54,10 +55,11 @@ fun HomeScreen(
             leadingIcon = {
                 //No box 1, o incone
                 Icon(Icons.Default.Search, contentDescription = "busca")
-                //No box 2,a  descrição:
 
 
             },
+            //No box 2,a  descrição:
+
             label = { Text(text = "Produto") },
             // A dica aparece quando se interage com o box
             placeholder = { Text(text = "O que voc procura?") }
@@ -69,19 +71,25 @@ fun HomeScreen(
             contentPadding = PaddingValues(bottom = 16.dp)
         ) {
 
-            items(sampleProducts){
-                p -> CardProductItem(product = p, Modifier.padding(horizontal = 16.dp))
+            // vefiicar se foi digitado algum valor do textField:
+            if (text.isBlank()) {
+                // Apresentar as secoçes de itens:
+                for (section in sections) {
+                    val title = section.key
+                    val products = section.value
+                    item {
+                        ProductsSection(
+                            title = title, products = products
+                        )
+                    }
+                }
+            } else {
+//exibe os cards
+                items(sampleProducts) { p ->
+                    CardProductItem(product = p, Modifier.padding(horizontal = 16.dp))
+                }
             }
-//            // Apresentar as secoçes de itens:
-//            for (section in sections) {
-//                val title = section.key
-//                val products = section.value
-//                item {
-//                    ProductsSection(
-//                        title = title, products = products
-//                    )
-//                }
-//            }
+
         }
     }
 }
