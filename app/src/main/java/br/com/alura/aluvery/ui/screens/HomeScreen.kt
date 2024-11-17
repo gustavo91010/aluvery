@@ -30,41 +30,37 @@ import br.com.alura.aluvery.sampledata.sampleProducts
 import br.com.alura.aluvery.sampledata.sampleSections
 import br.com.alura.aluvery.ui.components.CardProductItem
 import br.com.alura.aluvery.ui.components.ProductsSection
+import br.com.alura.aluvery.ui.components.SearchTextField
 import br.com.alura.aluvery.ui.theme.AluveryTheme
 import kotlin.random.Random
 
 @Composable
 fun HomeScreen(
     sections: Map<String, List<Product>>,
-    textoDeBusca: String= ""
+    textoDeBusca: String = ""
 ) {
 
     Column {
-        //remember vai manter o ultimo estado salvo
+
         var text by remember { mutableStateOf(textoDeBusca) }
+        SearchTextField(text, onSearcheChange = { text = it })
+        // parece que cada vez que o SearchTextField rodar, ele atualiza o estado...
+        //com esse onSearcheChange...
 
+        /*
+garantir que esse codigo so seja executadno novamente, (em um anova renderização de tela)
+se o texto for outro...
+com a configuração do remember, o codigo só vai regair se o valor for outro
+ */
+        var searcheProducts = remember(text) {
 
-        //onValueChange identifica se o valor esta sendo alterado
-        OutlinedTextField(value = text,
-            onValueChange = { newValue ->
-                text = newValue // o valor de newValue vai para nosso text
-            }, Modifier // modificando a caixa do texto
-                .padding(16.dp)
-                .fillMaxWidth(),
-            shape = RoundedCornerShape(100),
-            leadingIcon = {
-                //No box 1, o incone
-                Icon(Icons.Default.Search, contentDescription = "busca")
-
-
-            },
-            //No box 2,a  descrição:
-
-            label = { Text(text = "Produto") },
-            // A dica aparece quando se interage com o box
-            placeholder = { Text(text = "O que voc procura?") }
-
-        )
+            sampleProducts.filter { product ->
+                product.name.contains(text, true)
+                        || product.description?.contains(text, true)
+                        ?: false
+                //Como o descrição pode ser nulo, se tiver, eu pergunto, se não, ja mando umf alse para o filtro
+            }
+        }
         LazyColumn(
             Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -85,7 +81,8 @@ fun HomeScreen(
                 }
             } else {
 //exibe os cards
-                items(sampleProducts) { p ->
+                // o sampleProducts tem todos os nossos produtos, seria nosso banco de dados
+                items(searcheProducts) { p ->
                     CardProductItem(product = p, Modifier.padding(horizontal = 16.dp))
                 }
             }
